@@ -1,8 +1,6 @@
 import React from "react";
-import { useState } from "react";
 
-function ToyCard({toy, setToyList, toyList}) {
-  const [updatedLikes, setLikes] = useState(toy.likes)
+function ToyCard({toy, setToyList}) {
 
   function handleLikeClick (event) {
      //setLikes(prev => prev + 1)
@@ -12,10 +10,19 @@ function ToyCard({toy, setToyList, toyList}) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ likes: updatedLikes })
+      body: JSON.stringify({ likes: toy.likes + 1 })
     })
     .then(resp => resp.json())
-    
+    .then(updated => {
+      setToyList(prev => prev.map(newToy => {
+        if (newToy.id === toy.id) {
+          return updated
+        } else {
+          return prev
+        }
+      }))
+    })
+    .catch(error => console.log(error))
   }
 
   function handleDeleteClick(event) {
@@ -25,10 +32,13 @@ function ToyCard({toy, setToyList, toyList}) {
         'Content-Type': 'application/json'
       }
     })
-    .then(resp=>resp.json())
-
     
-    //Figure out how to update the DOM for DELETE
+    setToyList(prev => {
+      return prev.filter(newToy => {
+        return newToy.id !== toy.id
+      })
+    })
+    
   }
   
   return (
@@ -39,7 +49,7 @@ function ToyCard({toy, setToyList, toyList}) {
         alt={toy.name}
         className="toy-avatar"
       />
-      <p>{updatedLikes} Likes </p>
+      <p>{toy.likes} Likes </p>
       <button className="like-btn" onClick={handleLikeClick}>Like {"<3"}</button>
       <button className="del-btn" onClick={handleDeleteClick}>Donate to GoodWill</button>
     </div>
